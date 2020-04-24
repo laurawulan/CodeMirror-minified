@@ -36,10 +36,12 @@ const closureCompiler = require('google-closure-compiler').gulp();
 const cleanCss = require('gulp-clean-css');
 
 const CM_ROOT = 'CodeMirror/';
+const SFDC_ROOT = 'sfdc/';
 
 function runFlatMap() {
   return flatmap((stream, file) => {
-    const pathAtCmRoot = file.relative.replace(CM_ROOT, '');
+    const pathAtCmRoot = file.relative.replace(CM_ROOT, '').replace(SFDC_ROOT, '');
+
     // Travis kills a build if no log output for 10 minutes
     console.log('Minifying ' + pathAtCmRoot);
     return stream.pipe(closureCompiler({
@@ -58,6 +60,7 @@ function minifyMainJs() {
                CM_ROOT + 'addon/**/*.js',
                CM_ROOT + 'keymap/**/*.js',
                CM_ROOT + 'lib/**/*.js',
+               SFDC_ROOT + 'addon/**/*.js',
              ],
              {base: '.'})
       .pipe(runFlatMap())
