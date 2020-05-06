@@ -40,7 +40,7 @@ const SFDC_ROOT = 'sfdc/';
 
 function runFlatMap() {
   return flatmap((stream, file) => {
-    const pathAtCmRoot = file.relative.replace(CM_ROOT, '').replace(SFDC_ROOT, '');
+    const pathAtCmRoot = file.relative.replace(CM_ROOT, 'dist/').replace(SFDC_ROOT, 'dist/');
 
     // Travis kills a build if no log output for 10 minutes
     console.log('Minifying ' + pathAtCmRoot);
@@ -56,33 +56,55 @@ function runFlatMap() {
 
 function minifyMainJs() {
   return src(
-             [
-               CM_ROOT + 'addon/**/*.js',
-               CM_ROOT + 'keymap/**/*.js',
-               CM_ROOT + 'lib/**/*.js',
-               SFDC_ROOT + 'addon/**/*.js',
-             ],
+              [
+                // core
+                CM_ROOT + 'lib/**/*.js',
+
+                // mode
+                CM_ROOT + 'mode/xml/xml.js',
+                CM_ROOT + 'mode/javascript/javascript.js',
+                CM_ROOT + 'mode/css/css.js',
+                CM_ROOT + 'mode/htmlmixed/htmlmixed.js',
+
+                // addon - fold
+                CM_ROOT + 'addon/fold/foldcode.js',
+                CM_ROOT + 'addon/fold/foldgutter.js',
+                CM_ROOT + 'addon/fold/brace-fold.js',
+                CM_ROOT + 'addon/fold/xml-fold.js',
+                CM_ROOT + 'addon/fold/indent-fold.js',
+                CM_ROOT + 'addon/fold/markdown-fold.js',
+                CM_ROOT + 'addon/fold/comment-fold.js',
+
+                // addon - auto-closed tag
+                CM_ROOT + 'addon/edit/closetag.js',
+
+                SFDC_ROOT + 'addon/sfdc/*.js',
+              ],
              {base: '.'})
       .pipe(runFlatMap())
       .pipe(dest('.'));
 }
 
-function minifyModesJs() {
-  return src([CM_ROOT + 'mode/**/*.js', '!' + CM_ROOT + 'mode/**/*test.js'],
-             {base: '.'})
-      .pipe(runFlatMap())
-      .pipe(dest('.'));
-}
-
-function minifyCss() {
+function minifyCodeMirrorCss() {
   return src(
              [
-               CM_ROOT + 'addon/**/*.css', CM_ROOT + 'lib/**/*.css',
-               CM_ROOT + 'mode/**/*.css', CM_ROOT + 'theme/**/*.css'
+               CM_ROOT + 'lib/codemirror.css',
+               CM_ROOT + 'addon/fold/foldgutter.css', 
+               SFDC_ROOT + 'addon/sfdc/htmlhint.css'
              ],
              {base: CM_ROOT})
       .pipe(cleanCss())
-      .pipe(dest('.'));
+      .pipe(dest('dist'));
+}
+
+function minifySFDCCss() {
+  return src(
+             [
+               SFDC_ROOT + 'addon/sfdc/htmlhint.css'
+             ],
+             {base: SFDC_ROOT})
+      .pipe(cleanCss())
+      .pipe(dest('dist'));
 }
 
 function copyTextFiles() {
@@ -90,5 +112,5 @@ function copyTextFiles() {
       .pipe(dest('.'));
 }
 
-exports.minify = parallel(minifyMainJs, minifyModesJs, minifyCss);
+exports.minify = parallel(minifyMainJs, minifyCodeMirrorCss, minifySFDCCss);
 exports.default = series(copyTextFiles, exports.minify);

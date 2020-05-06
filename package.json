@@ -7,6 +7,9 @@
   "directories": {
     "lib": "./lib"
   },
+  "scripts": {
+    "build": "rm -rf dist && gulp"
+  },
   "files": [
     "addon",
     "keymap",
