@@ -89,8 +89,7 @@ function minifyCodeMirrorCss() {
   return src(
              [
                CM_ROOT + 'lib/codemirror.css',
-               CM_ROOT + 'addon/fold/foldgutter.css', 
-               SFDC_ROOT + 'addon/sfdc/htmlhint.css'
+               CM_ROOT + 'addon/fold/foldgutter.css'
              ],
              {base: CM_ROOT})
       .pipe(cleanCss())

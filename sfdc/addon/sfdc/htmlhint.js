@@ -9,13 +9,13 @@
     "use strict";
     const GUTTER_ID = "CodeMirror-sfdc-markers";
 
-    // Clear errors on Gutter
+    // Clear markers on Gutter
     CodeMirror.defineExtension("clearSfdcMarkers", function () {
         var cm = this;
         clearSfdcMarks(cm);
     });
 
-    // Mark errors
+    // Show markers
     CodeMirror.defineExtension("showSfdcMarkers", function (errors) {
         var cm = this;
         clearSfdcMarks(cm);
@@ -80,14 +80,18 @@
         var lines = [];
         for (var i = 0; i < errors.length; i++) {
             var error = errors[i];
-            if (error) {
-                if (!Number.isInteger(error.line) || error.line <= 0 ) {
+            if (error && error.line) {
+                if (typeof error.line === 'string') { // line number is string
+                    error.line = parseInt(error.line);
+                }  
+                
+                if (!Number.isInteger(error.line) || error.line <= 0) {// line number must greater than 0
                     continue;
                 }
 
                 var from, to;
-                if (Number.isInteger(error.character) && error.character >= 1) {
-                    var start = error.character - 1;
+                if (Number.isInteger(error.ch) && error.ch >= 1) {
+                    var start = error.ch - 1;
                     var end = start + 1;
                     if (error.evidence && error.evidence.length > 0) {
                         end = start +  error.evidence.length;
@@ -152,9 +156,11 @@
         if (tt.style.opacity != null) tt.style.opacity = 1;
         return tt;
     }
+
     function rm(elt) {
         if (elt.parentNode) elt.parentNode.removeChild(elt);
     }
+
     function hideTooltip(tt) {
         if (!tt.parentNode) return;
         if (tt.style.opacity == null) rm(tt);
